@@ -4,7 +4,7 @@ const validateUserInput = require('../helperfun/validateUserInput');
 const APIRes = require('../helperfun/result');
 const { validationResult } = require("express-validator");
 
-exports.user_login = async (req, res, next) => {
+exports.emp_create = async (req, res, next) => {
 
     let errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -12,7 +12,7 @@ exports.user_login = async (req, res, next) => {
     }
     const userInput = Utils.getReqValues(req);
     console.log(userInput)
-    const requiredFields = ["name", "email", "phonenumber", "password"];
+    const requiredFields = ["empcode","name", "email", "phonenumber", "password","username"];
     const inputs = validateUserInput.validateUserInput(userInput, requiredFields);
     if (inputs !== true) {
         return APIRes.getNotExistsResult(`Required ${inputs}`, res);
@@ -33,13 +33,13 @@ exports.user_login = async (req, res, next) => {
     }
 
     const existing_record = await pool.query(
-        'SELECT * FROM user_login_hdr WHERE email = $1',
+        'SELECT * FROM user-login WHERE email = $1',
         [email]
     );
     if (existing_record.rows.length === 0) {
         console.log("kavitha")
         const result = await pool.query(
-            'INSERT INTO user_login_hdr(name, email, phone, password) VALUES ($1, $2, $3, $4) RETURNING *',
+            'INSERT INTO user_login_hdr(empcode,name, email, phone, password,username) VALUES ($1, $2, $3, $4,$5,$6) RETURNING *',
             [name, email, phonenumber, password]
         );
         console.log(result.rows)
