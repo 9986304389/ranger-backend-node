@@ -7,28 +7,20 @@ const path = require("path");
 const port = 3001;
 const save_user_login = require('./router/user_login_router');
 const helmet = require("helmet");
-const { initializeConnection } = require("../db");
+const { getClient } = require("./helperfun/postgresdatabase");
 
-// Initialize the database connection (before handling any requests)
-initializeConnection()
-  .then(async(client) => {
-    console.log('Database connection established!');
-    try {
-      // Example query
-      const result = await client.query('SELECT * FROM user-login');
-      console.log('Query result:', result.rows);
-    } catch (error) {
-      console.error('Error executing query:', error);
-    } finally {
-      // Close the connection when done
-      await client.end();
-      console.log('Database connection closed.');
-    }
-  })
-  .catch((error) => {
-    console.error('Error establishing the database connection:', error);
-    //process.exit(1); // Terminate the Lambda function on connection error
-  });
+
+async function main() {
+  try {
+    const client = await getClient();
+    console.log("Connected to the database");
+
+  } catch (error) {
+    console.error("Error connecting to the database:", error);
+  }
+}
+
+main();
 
 const corsOptions = {
   origin: '*',
@@ -96,4 +88,3 @@ app.listen(port, () => {
 
 
 
-//module.exports.handler = serverless(app);
