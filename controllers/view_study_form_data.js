@@ -1,4 +1,4 @@
-const pool = require('../db');
+const pool = require('../../db');
 const Utils = require('../helperfun/utils');
 const validateUserInput = require('../helperfun/validateUserInput');
 const APIRes = require('../helperfun/result');

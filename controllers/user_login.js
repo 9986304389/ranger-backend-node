@@ -1,4 +1,4 @@
-const pool = require('../db');
+const { getClient } = require("../helperfun/postgresdatabase");
 const Utils = require('../helperfun/utils');
 const validateUserInput = require('../helperfun/validateUserInput');
 const APIRes = require('../helperfun/result');
@@ -11,38 +11,41 @@ exports.emp_create = async (req, res, next) => {
         throw errors.array();
     }
     const userInput = Utils.getReqValues(req);
-    console.log(userInput)
-    const requiredFields = ["empcode","name", "email", "phonenumber", "password","username"];
+
+    const requiredFields = ["empcode", "name", "email", "phonenumber", "password", "username"];
     const inputs = validateUserInput.validateUserInput(userInput, requiredFields);
     if (inputs !== true) {
         return APIRes.getNotExistsResult(`Required ${inputs}`, res);
     }
 
-
+    let empcode = userInput.empcode;
     let name = userInput.name;
     let email = userInput.email;
     let phonenumber = userInput.phonenumber;
     let password = userInput.password;
+    let username = userInput.username;
 
-    if (validateEmail(email)) {
+    if (!validateEmail(email)) {
         console.log("Email is valid");
-
-    } else {
-        console.log("Email is invalid");
         return APIRes.getFinalResponse(false, `Email is invalid`, [], res);
     }
 
-    const existing_record = await pool.query(
-        'SELECT * FROM user-login WHERE email = $1',
-        [email]
-    );
+
+
+    const existing_record = `
+        'SELECT * FROM user-login WHERE empcode = ${empcode}`
+
+
+    const client = await getClient();
+    const result = await client.query(existing_record);
+    console.log(result.rows)
     if (existing_record.rows.length === 0) {
         console.log("kavitha")
-        const result = await pool.query(
-            'INSERT INTO user_login_hdr(empcode,name, email, phone, password,username) VALUES ($1, $2, $3, $4,$5,$6) RETURNING *',
-            [name, email, phonenumber, password]
+        const result = await getClient().query(
+            'INSERT INTO user-login(empcode,name, email, phone, password,username) VALUES ($1, $2, $3, $4,$5,$6) RETURNING *',
+            [empcode, name, email, phonenumber, password, username]
         );
-        console.log(result.rows)
+
         if (result) {
             return APIRes.getFinalResponse(true, `Profile created successfully.`, [], res);
 
